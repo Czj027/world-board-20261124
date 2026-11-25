@@ -31,6 +31,6 @@ The artwork uses 3× supersampling and a Lanczos reduction. The verification com
 
 ## Credits
 
-The entry code and original artwork are MIT licensed. Source Serif 4, Barlow Condensed, IBM Plex Sans Condensed and IBM Plex Mono are distributed with their [OFL license texts](assets). Natural Earth's 1:110m [land layer](https://www.naturalearthdata.com/downloads/110m-physical-vectors/110m-land/) is public domain.
+The entry code and original artwork are MIT licensed. Source Serif 4, Barlow Condensed, IBM Plex Sans Condensed and IBM Plex Mono are distributed with their [OFL license texts](assets). The world map uses Natural Earth's public-domain [1:110m land layer](https://www.naturalearthdata.com/downloads/110m-physical-vectors/110m-land/). The Zaporizhzhia locator uses the corresponding [1:110m country outline](https://www.naturalearthdata.com/downloads/110m-cultural-vectors/110m-admin-0-countries/).
 
 Built for [make.fun's 24 November world news image bounty](https://make.fun/bounty/news-image-20261124).

@@ -4,21 +4,21 @@ LEADS = {
     3: (
         "NORTH AMERICA  /  JUSTICE",
         "US jury convicts Huawei",
-        "A Brooklyn jury convicted the Chinese telecom group on 10 of 12 counts, including trade-secret conspiracy, fraud and Iran sanctions violations.",
+        "The Brooklyn verdict covers trade-secret conspiracy, fraud and Iran sanctions violations. Huawei is a Chinese telecom group.",
         "U.S. JUSTICE DEPARTMENT  /  REUTERS",
         "verdict",
     ),
     2: (
         "EUROPE  /  WAR IN UKRAINE",
         "Russian strike kills two in Zaporizhzhia",
-        "An overnight strike hit residential buildings. Ukrainian officials reported two dead and more than 40 injured.",
+        "An overnight Russian strike hit residential buildings. Ukrainian officials reported two dead and more than 40 hurt.",
         "AP  /  AL JAZEERA",
         "ukraine",
     ),
     18: (
         "MIDDLE EAST  /  ENERGY",
         "Baghdad orders oilfield takeover",
-        "Iraq directed its federal oil ministry to manage fields under Kurdish security control. Kurdish leaders rejected the order.",
+        "Iraq directed its oil ministry to manage fields under Kurdish security control. Kurdish leaders rejected the order.",
         "REUTERS  /  AL JAZEERA",
         "oil",
     ),
@@ -41,11 +41,27 @@ DESK = {
     27: ("MALAYSIA", "Malaysia to send 6,803 back", "Myanmar nationals due back."),
     19: ("STRAIT OF HORMUZ", "Iran says tankers hit mines", "Mine claim is unverified."),
     14: ("SENEGAL", "Senegal regains Africa Cup title", "1–0 over Morocco restored."),
-    11: ("ENGLAND", "Heat deaths hit record estimate", "5,258 linked to summer heat."),
+    11: ("ENGLAND", "Record heat-death estimate", "5,258 linked to summer heat."),
     24: ("SOUTH KOREA", "Seoul protests Russian air entry", "Russian attaché summoned."),
     23: ("CHINA / PAKISTAN", "China names Shenzhou-24 crew", "First Pakistani crew member."),
     31: ("FRENCH GUIANA", "Ariane 6 launches 36 satellites", "Amazon Leo reaches orbit."),
     32: ("INDONESIA", "Factory fire toll rises to 26", "Candy plant burned Nov. 21."),
+}
+
+# A large figure and its qualifier extend each visual across the desk column.
+DESK_SIGNAL = {
+    21: ("PIF", "HQ HIT"),
+    22: ("PROBE", "POLITBURO"),
+    1: ("+8.99%", "TAIEX CLOSE"),
+    10: ("$175", "PER SHARE"),
+    27: ("DEC.", "RETURN PLAN"),
+    19: ("IRAN", "MINE CLAIM"),
+    14: ("CAS", "TITLE BACK"),
+    11: ("RECORD", "UKHSA EST."),
+    24: ("ADIZ", "AIR ZONE"),
+    23: ("PAK", "ASTRONAUT"),
+    31: ("36", "IN ORBIT"),
+    32: ("24 NOV", "TOLL UPDATE"),
 }
 
 WIRE = {

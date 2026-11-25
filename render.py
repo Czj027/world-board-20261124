@@ -8,7 +8,7 @@ from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFont
 
-from edition import BRIEFS, DATE_NOTE, DESK, FIGURES, LEADS, ORDER, SOURCE_NOTE, WIRE
+from edition import BRIEFS, DATE_NOTE, DESK, DESK_SIGNAL, FIGURES, LEADS, ORDER, SOURCE_NOTE, WIRE
 
 
 ROOT = Path(__file__).resolve().parent
@@ -24,6 +24,18 @@ TEAL = "#07665e"
 BLUE = "#244f91"
 OCHRE = "#885716"
 ACCENT = {"conflict": RED, "economy": TEAL, "society": OCHRE, "politics": BLUE}
+VIOLET = "#6d3d86"
+GREEN = "#3c693e"
+RASPBERRY = "#963758"
+AMBER = "#8e531a"
+MARINE = "#17677b"
+TOPIC_ACCENT = {
+    3: VIOLET, 6: VIOLET, 13: VIOLET, 17: VIOLET, 22: VIOLET,
+    5: GREEN, 11: GREEN, 30: GREEN,
+    9: RASPBERRY, 12: RASPBERRY, 14: RASPBERRY,
+    19: AMBER, 32: AMBER,
+    23: MARINE, 31: MARINE,
+}
 REGIONS = {
     "North America", "Latin America", "Europe", "Africa", "Middle East",
     "South Asia", "East Asia", "Southeast Asia", "Oceania",
@@ -145,6 +157,10 @@ def place_art(page, x, y, width, height, artwork, native_size):
     page.image.paste(canvas.image, px(x, y))
 
 
+def story_color(key, stories):
+    return TOPIC_ACCENT.get(key, ACCENT[stories[key]["category"]])
+
+
 def badge(page, x, y, number, color):
     page.rect(x, y, 20, 15, color)
     page.text(x + 10, y + 7.5, f"{number:02}", "mono", 10, PAPER, anchor="mm")
@@ -157,14 +173,14 @@ def heading(page, y, text, aside):
 
 
 def masthead(page, count, regions):
-    page.line([(LEFT, 18), (LEFT + 158, 18)], RED, 2.2)
-    page.line([(LEFT + 158, 18), (RIGHT, 18)], INK, 2.2)
-    page.text(LEFT, 25, "THE WORLD DISPATCH", "condensed", 19, RED)
-    page.text(RIGHT, 28, f"{count} STORIES  /  {regions} REGIONS", "mono", 13, INK, anchor="rt")
-    page.fit(LEFT - 2, 41, "Tuesday 24 November 2026", "serif", 75, RIGHT - LEFT + 1, 61)
-    page.text(LEFT, 115, "WORLD NEWS  /  THE FULL UTC DAY", "mono", 12, INK)
-    page.text(RIGHT, 115, "00:00–24:00 UTC", "mono", 12, RED, anchor="rt")
-    page.line([(LEFT, 133), (RIGHT, 133)], INK, 1.2)
+    page.line([(LEFT, 14), (LEFT + 158, 14)], RED, 2.2)
+    page.line([(LEFT + 158, 14), (RIGHT, 14)], INK, 2.2)
+    page.text(LEFT, 20, "THE WORLD DISPATCH", "condensed", 17, RED)
+    page.text(RIGHT, 22, f"{count} STORIES  /  {regions} REGIONS", "mono", 13, INK, anchor="rt")
+    page.fit(LEFT - 2, 34, "Tuesday 24 November 2026", "serif", 69, RIGHT - LEFT + 1, 61)
+    page.text(LEFT, 102, "WORLD NEWS  /  THE FULL UTC DAY", "mono", 11, INK)
+    page.text(RIGHT, 102, "00:00–24:00 UTC", "mono", 11, RED, anchor="rt")
+    page.line([(LEFT, 118), (RIGHT, 118)], INK, 1.2)
 
 
 def numbers(page):
@@ -172,10 +188,10 @@ def numbers(page):
     for index, (figure, label) in enumerate(FIGURES):
         x = LEFT + index * width
         if index:
-            page.line([(x, 139), (x, 181)])
-        page.text(x + 8, 139, figure, "serif", 30, RED if index in (0, 3) else TEAL)
-        page.text(x + 8, 170, label, "body", 14, MUTED, width=width - 15)
-    page.line([(LEFT, 190), (RIGHT, 190)], INK, 1.5)
+            page.line([(x, 121), (x, 156)])
+        page.text(x + 8, 122, figure, "serif", 25, RED if index in (0, 3) else TEAL)
+        page.text(x + 8, 146, label, "body", 12, MUTED, width=width - 15)
+    page.line([(LEFT, 162), (RIGHT, 162)], INK, 1.5)
 
 
 def lead_section(page, stories, positions):
@@ -183,16 +199,16 @@ def lead_section(page, stories, positions):
 
     spans = [(24, 342), (380, 303), (697, 303)]
     for (key, (kicker, title, summary, sources, illustration)), (x, width) in zip(LEADS.items(), spans):
-        color = ACCENT[stories[key]["category"]]
+        color = story_color(key, stories)
         if x != LEFT:
-            page.line([(x - 7, 197), (x - 7, 450)], RULE)
-        badge(page, x, 200, positions[key], color)
-        page.text(x + 26, 201, kicker, "mono", 12, color, width=width - 26)
-        place_art(page, x, 218, width, 92, LEAD_ART[illustration], (300, 95))
+            page.line([(x - 7, 167), (x - 7, 426)], RULE)
+        badge(page, x, 169, positions[key], color)
+        page.text(x + 26, 170, kicker, "mono", 12, color, width=width - 26)
+        place_art(page, x, 187, width, 107, LEAD_ART[illustration], (300, 95))
         title_size = 36 if key == 3 else 30
-        n = page.paragraph(x, 315, title, "serif", title_size, width, 2, 36 if key == 3 else 32)
-        page.paragraph(x, 322 + 32 * n, summary, "body", 16, width - 5, 3, 17)
-        page.text(x, 438, sources, "mono", 11, color, width=width)
+        n = page.paragraph(x, 300, title, "serif", title_size, width, 2, 36 if key == 3 else 32)
+        page.paragraph(x, 308 + 32 * n, summary, "body", 15.5, width - 5, 3, 15.5)
+        page.text(x, 417, sources, "mono", 11, color, width=width)
 
 
 def newsroom(page, stories, positions):
@@ -202,38 +218,46 @@ def newsroom(page, stories, positions):
     artwork = DESK_ART_A | DESK_ART_B
     if set(artwork) != set(DESK):
         raise ValueError("Each desk story needs a dedicated illustration.")
-    heading(page, 457, "THE NEWS DESK", "12 ILLUSTRATED REPORTS")
-    column = (RIGHT - LEFT) / 6
+    heading(page, 433, "THE NEWS DESK", "12 ILLUSTRATED REPORTS")
+    column = (RIGHT - LEFT) / 4
     for index, (key, (loc, title, detail)) in enumerate(DESK.items()):
-        row, col = divmod(index, 6)
-        x, y = LEFT + col * column, 482 + row * 115
-        color = ACCENT[stories[key]["category"]]
+        row, col = divmod(index, 4)
+        x, y = LEFT + col * column, 455 + row * 102
+        color = story_color(key, stories)
         if row:
-            page.line([(x, y - 2), (x + column - 10, y - 2)], RULE)
+            page.line([(x, y - 1), (x + column - 10, y - 1)], RULE)
         if col:
-            page.line([(x - 5, y), (x - 5, y + 107)], RULE)
-        place_art(page, x, y, column - 10, 46, artwork[key], (150, 50))
-        badge(page, x, y + 49, positions[key], color)
-        page.fit(x + 24, y + 52, loc, "mono", 10.5, column - 34, 9, color)
-        page.paragraph(x, y + 67, title, "semibold", 17, column - 10, 2, 16)
-        page.fit(x, y + 99, detail, "body", 13, column - 10, 12, MUTED)
+            page.line([(x - 5, y), (x - 5, y + 97)], RULE)
+        badge(page, x, y, positions[key], color)
+        page.text(x + 25, y + 3, loc, "mono", 10.5, color, width=column - 34)
+        place_art(page, x, y + 16, 165, 54, artwork[key], (150, 50))
+        data_x, data_width = x + 165, column - 175
+        page.rect(data_x, y + 16, data_width, 54, color)
+        value, label = DESK_SIGNAL[key]
+        value_size = 21.5 if len(value) > 5 else 24
+        page.text(data_x + data_width / 2, y + 38, value, "condensed", value_size, PAPER,
+                  width=data_width - 8, anchor="mm")
+        page.text(data_x + data_width / 2, y + 58, label, "condensed", 10.5, PAPER,
+                  width=data_width - 4, anchor="mm")
+        page.fit(x, y + 71, title, "semibold", 17.5, column - 10, 16.5)
+        page.fit(x, y + 89, detail, "body", 12.5, column - 10, 12, MUTED)
 
 
 def timeline(page, stories, positions):
-    page.line([(LEFT, 712), (RIGHT, 712)], INK, 1.2)
-    page.rect(LEFT, 716, 79, 44, INK)
-    page.text(LEFT + 9, 721, "THE DAY", "condensed", 17, PAPER)
-    page.text(LEFT + 9, 740, "IN UTC", "condensed", 15, PAPER)
+    page.line([(LEFT, 762), (RIGHT, 762)], INK, 1.2)
+    page.rect(LEFT, 766, 79, 39, INK)
+    page.text(LEFT + 9, 769, "THE DAY", "condensed", 16, PAPER)
+    page.text(LEFT + 9, 788, "IN UTC", "condensed", 14, PAPER)
     step = (RIGHT - LEFT - 79) / len(WIRE)
     for index, (key, (time, place, title, detail)) in enumerate(WIRE.items()):
         x = LEFT + 86 + index * step
-        color = ACCENT[stories[key]["category"]]
+        color = story_color(key, stories)
         if index:
-            page.line([(x - 5, 719), (x - 5, 759)], SOFT_RULE)
-        page.text(x, 719, f"{time}  /  {place}", "mono", 10.5, color, width=step - 26)
-        page.text(x + step - 13, 719, f"{positions[key]:02}", "mono", 10, color, anchor="rt")
-        page.fit(x, 732, title, "semibold", 16, step - 10, 15)
-        page.text(x, 751, detail, "body", 12.5, MUTED, width=step - 11)
+            page.line([(x - 5, 768), (x - 5, 804)], SOFT_RULE)
+        page.text(x, 766, f"{time}  /  {place}", "mono", 9.5, color, width=step - 26)
+        page.text(x + step - 13, 766, f"{positions[key]:02}", "mono", 10, color, anchor="rt")
+        page.fit(x, 777, title, "semibold", 15, step - 10, 14)
+        page.text(x, 797, detail, "body", 12, MUTED, width=step - 11)
 
 
 def positions_for_map(page, stories, positions, area):
@@ -254,7 +278,7 @@ def positions_for_map(page, stories, positions, area):
                 continue
             for i, ring in enumerate(polygon):
                 coords = [slide(lon, min(north, max(south, lat))) for lon, lat in ring]
-                page.polygon(coords, "#b1b8a1" if i == 0 else "#f1e5d2")
+                page.polygon(coords, "#a5b69f" if i == 0 else "#e8e9db")
                 if i == 0:
                     page.line(coords, "#7f876f", .75)
 
@@ -283,41 +307,43 @@ def positions_for_map(page, stories, positions, area):
             page.line([(x, y), (mx, my)], "#6b695f", .8)
             page.disk(x, y, 1.5, "#625847")
     for key, _, _, mx, my in located:
-        color = ACCENT[stories[key]["category"]]
+        color = story_color(key, stories)
         page.disk(mx, my, 7.3, color, PAPER)
         page.text(mx, my, f"{positions[key]:02}", "mono", 8.7, PAPER, anchor="mm")
 
 
 def index_and_briefs(page, stories, positions):
-    heading(page, 768, "AROUND THE WORLD", "15 BRIEFS  /  BY REGION")
-    page.text(LEFT, 793, "WHERE IT HAPPENED", "mono", 11.5, TEAL)
-    page.text(LEFT + 251, 794, "01–15", "mono", 11, MUTED, anchor="rt")
-    page.rect(LEFT, 810, 254, 114, "#f1e5d2")
-    positions_for_map(page, stories, positions, (LEFT + 2, 818, 250, 96))
-    page.paragraph(LEFT, 932, "Numbers 01–15 match the illustrated headlines.",
+    heading(page, 810, "AROUND THE WORLD", "15 BRIEFS  /  BY REGION")
+    page.text(LEFT, 833, "WORLD MAP", "mono", 11.5, TEAL)
+    page.text(LEFT + 251, 833, "01–15", "mono", 11, MUTED, anchor="rt")
+    page.rect(LEFT, 848, 254, 106, "#e8e9db")
+    positions_for_map(page, stories, positions, (LEFT + 2, 852, 250, 96))
+    page.paragraph(LEFT, 957, "Pins match the illustrated headlines.",
                    "body", 12.5, 249, 2, 13, MUTED)
     names = ("AMERICAS / EUROPE", "AFRICA / MIDDLE EAST", "ASIA / PACIFIC")
     width = (RIGHT - 291) / len(BRIEFS)
     for col, (name, briefs) in enumerate(zip(names, BRIEFS)):
         x = 291 + col * width
-        page.line([(x - 6, 793), (x - 6, 951)], RULE)
-        page.text(x, 793, name, "mono", 11.5, TEAL)
+        page.line([(x - 6, 833), (x - 6, 971)], RULE)
+        page.text(x, 833, name, "mono", 11.5, TEAL)
         for row, (key, place, title) in enumerate(briefs):
-            y = 811 + row * 28
+            y = 848 + row * 25.5
             if row:
-                page.line([(x, y - 3), (x + width - 7, y - 3)], SOFT_RULE, .75)
-            color = ACCENT[stories[key]["category"]]
-            page.text(x, y + 1, f"{positions[key]:02}  {place}", "mono", 10, color)
-            page.fit(x, y + 12, title, "semibold", 16, width - 12, 14.5)
+                page.line([(x, y - 1), (x + width - 7, y - 1)], SOFT_RULE, .75)
+            color = story_color(key, stories)
+            page.rect(x, y, 17, 10, color)
+            page.text(x + 8.5, y + 5, f"{positions[key]:02}", "mono", 8.5, PAPER, anchor="mm")
+            page.text(x + 22, y + 1, place, "mono", 9.5, color)
+            page.fit(x, y + 11, title, "semibold", 15.5, width - 12, 14)
 
 
 def footer(page):
-    page.line([(LEFT, 963), (RIGHT, 963)], INK, 1.2)
+    page.line([(LEFT, 978), (RIGHT, 978)], INK, 1.2)
     for index, (label, note) in enumerate((DATE_NOTE, SOURCE_NOTE)):
-        y = 971 + index * 17
+        y = 984 + index * 14
         page.text(LEFT, y + 1, label, "mono", 10.5, RED if not index else TEAL)
         page.text(LEFT + 102, y, note, "body", 12, MUTED, width=RIGHT - LEFT - 102)
-    page.line([(LEFT, 1008), (RIGHT, 1008)], INK, 1.2)
+    page.line([(LEFT, 1012), (RIGHT, 1012)], INK, 1.2)
 
 
 def render(story_data):

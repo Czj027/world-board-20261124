@@ -1,5 +1,8 @@
 """Original front-page vignettes drawn on a 300 by 95 logical canvas."""
 
+import json
+from pathlib import Path
+
 INK = "#202928"
 RUST = "#b93b2f"
 PETROL = "#006f5e"
@@ -86,8 +89,9 @@ def verdict(c):
         else:
             c.rect(x + .8, 52.8, 6.6, 6.6, "#f2e9da")
     c.line([(157, 67), (289, 67)], "#bca892", .7)
-    c.text(157, 72, "Trade secrets, fraud", 11, INK, "semibold")
-    c.text(157, 83, "and sanctions violations", 11, INK, "semibold")
+    c.text(157, 69, "2 COUNTS NOT GUILTY", 8.5, INK, "mono")
+    c.text(157, 79, "Trade secrets, fraud and", 9.5, INK, "semibold")
+    c.text(157, 88, "Iran sanctions violations", 9.5, INK, "semibold")
 
 
 def _apartments(c, front, side, roof, facade, shadow, coping, windows):
@@ -98,6 +102,25 @@ def _apartments(c, front, side, roof, facade, shadow, coping, windows):
         w, h = 4.3, 5.1
         c.rect(x, y, w, h, color)
         c.line([(x + 2.1, y + .2), (x + 2.1, y + h - .2)], facade, .53)
+
+
+def _zaporizhzhia_locator(c):
+    """Locate the city within the Natural Earth outline at newsprint scale."""
+    outline_path = Path(__file__).with_name("assets") / "ukraine-locator.json"
+    rings = json.loads(outline_path.read_text(encoding="utf-8"))
+
+    def project(lon, lat):
+        return 119 + (lon - 22) * 3.4, 11 + (52.5 - lat) * 2.75
+
+    c.rect(115, 3, 78, 35, "#294969")
+    for ring in rings:
+        outline = [project(lon, lat) for lon, lat in ring]
+        c.polygon(outline, "#6f8aa0")
+        c.line(outline, "#aec1cd", .5)
+    x, y = project(35.14, 47.84)
+    c.disk(x, y, 1.8, "#ffdb80", "#252f46")
+    c.text(118, 4, "UKRAINE LOCATOR", 7.1, "#f5efdf", "mono")
+    c.line([(x + 1.1, y + 1.1), (x + 4, y + 5), (185, y + 5)], "#ffdb80", .6)
 
 
 def ukraine(c):
@@ -154,6 +177,7 @@ def ukraine(c):
     c.line([(91, 58.5), (95, 58.5)], "#e0bb83", .8)
     c.rect(0, 80, 197, 15, "#1b3657")
     c.text(9, 84, "DNIPRO RIVER • ZAPORIZHZHIA", 8, "#f3e9d9", "mono")
+    _zaporizhzhia_locator(c)
 
     c.rect(195, 0, 105, 95, "#213d69")
     c.line([(195, 0), (195, 95)], "#8093aa", .85)
