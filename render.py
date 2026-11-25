@@ -14,15 +14,15 @@ from edition import BRIEFS, DATE_NOTE, DESK, FIGURES, LEADS, ORDER, SOURCE_NOTE,
 ROOT = Path(__file__).resolve().parent
 ASSETS = ROOT / "assets"
 SCALE = 3
-PAPER = "#f6f1e7"
-INK = "#1d2525"
-MUTED = "#555a53"
-RULE = "#bfb9ac"
-SOFT_RULE = "#d5cbb9"
-RED = "#9a3b31"
-TEAL = "#1c6261"
-BLUE = "#3f567b"
-OCHRE = "#77551d"
+PAPER = "#fcf4e7"
+INK = "#192422"
+MUTED = "#4e534c"
+RULE = "#aca38e"
+SOFT_RULE = "#d1c2ad"
+RED = "#ac3029"
+TEAL = "#07665e"
+BLUE = "#244f91"
+OCHRE = "#885716"
 ACCENT = {"conflict": RED, "economy": TEAL, "society": OCHRE, "politics": BLUE}
 REGIONS = {
     "North America", "Latin America", "Europe", "Africa", "Middle East",
@@ -103,6 +103,48 @@ class Page:
         self.draw.polygon([px(*point) for point in points], fill=color)
 
 
+class Illustration:
+    """Clip a diagram to its print box while keeping geometry in drawing units."""
+
+    def __init__(self, width, height, design_width, design_height):
+        self.image = Image.new("RGB", px(width, height), PAPER)
+        self.draw = ImageDraw.Draw(self.image)
+        self.scale_x = self.image.width / design_width
+        self.scale_y = self.image.height / design_height
+        self.unit = min(self.scale_x, self.scale_y)
+
+    def point(self, x, y):
+        return round(x * self.scale_x), round(y * self.scale_y)
+
+    def rect(self, x, y, w, h, fill):
+        self.draw.rectangle((self.point(x, y), self.point(x + w, y + h)), fill=fill)
+
+    def line(self, points, fill, width=1):
+        self.draw.line([self.point(*p) for p in points], fill=fill,
+                       width=max(1, round(width * self.unit)), joint="curve")
+
+    def polygon(self, points, fill):
+        self.draw.polygon([self.point(*p) for p in points], fill=fill)
+
+    def disk(self, x, y, r, fill, outline=None):
+        self.draw.ellipse((self.point(x - r, y - r), self.point(x + r, y + r)),
+                          fill=fill, outline=outline, width=max(1, round(self.unit / 2)))
+
+    def text(self, x, y, value, size=9, fill="#263531", face="mono", anchor="lt"):
+        style = font(face, size * self.unit / SCALE)
+        origin = self.point(x, y)
+        left, top, right, bottom = self.draw.textbbox(origin, value, font=style, anchor=anchor)
+        if left < 0 or top < 0 or right > self.image.width or bottom > self.image.height:
+            raise ValueError(f"Illustration label outside print box: {value}")
+        self.draw.text(origin, value, font=style, anchor=anchor, fill=fill)
+
+
+def place_art(page, x, y, width, height, artwork, native_size):
+    canvas = Illustration(width, height, *native_size)
+    artwork(canvas)
+    page.image.paste(canvas.image, px(x, y))
+
+
 def badge(page, x, y, number, color):
     page.rect(x, y, 20, 15, color)
     page.text(x + 10, y + 7.5, f"{number:02}", "mono", 10, PAPER, anchor="mm")
@@ -115,10 +157,11 @@ def heading(page, y, text, aside):
 
 
 def masthead(page, count, regions):
-    page.line([(LEFT, 18), (RIGHT, 18)], INK, 2)
+    page.line([(LEFT, 18), (LEFT + 158, 18)], RED, 2.2)
+    page.line([(LEFT + 158, 18), (RIGHT, 18)], INK, 2.2)
     page.text(LEFT, 25, "THE WORLD DISPATCH", "condensed", 19, RED)
     page.text(RIGHT, 28, f"{count} STORIES  /  {regions} REGIONS", "mono", 13, INK, anchor="rt")
-    page.fit(LEFT - 2, 46, "Tuesday 24 November 2026", "serif", 75, RIGHT - LEFT + 1, 61)
+    page.fit(LEFT - 2, 41, "Tuesday 24 November 2026", "serif", 75, RIGHT - LEFT + 1, 61)
     page.text(LEFT, 115, "WORLD NEWS  /  THE FULL UTC DAY", "mono", 12, INK)
     page.text(RIGHT, 115, "00:00–24:00 UTC", "mono", 12, RED, anchor="rt")
     page.line([(LEFT, 133), (RIGHT, 133)], INK, 1.2)
@@ -135,50 +178,9 @@ def numbers(page):
     page.line([(LEFT, 190), (RIGHT, 190)], INK, 1.5)
 
 
-def lead_illustration(page, x, y, width, kind):
-    height = 88
-    if kind == "verdict":
-        page.rect(x, y, width, height, "#e2e8df")
-        base = x + 15
-        page.polygon([(base, y + 34), (base + 49, y + 11), (base + 98, y + 34)], TEAL)
-        page.rect(base + 3, y + 36, 92, 5, TEAL)
-        for i in range(5):
-            page.rect(base + 11 + i * 17, y + 45, 6.5, 27, TEAL)
-        page.rect(base + 2, y + 75, 95, 4, TEAL)
-        cell_x = x + 128
-        for i in range(12):
-            col, row = i % 6, i // 6
-            cx, cy = cell_x + col * 20, y + 15 + row * 22
-            page.rect(cx, cy, 16, 16, TEAL if i < 10 else "#c1cfc5")
-            if i < 10:
-                page.line([(cx + 4, cy + 8), (cx + 7, cy + 11), (cx + 12, cy + 5)], PAPER, 1.2)
-        page.text(cell_x, y + 65, "10 OF 12 COUNTS GUILTY", "mono", 12, TEAL)
-    elif kind == "ukraine":
-        page.rect(x, y, width, height, "#eee0d4")
-        for i, (offset, top, w) in enumerate(((12, 40, 32), (47, 20, 42), (92, 35, 38), (119, 50, 23))):
-            base = x + offset
-            page.rect(base, y + top, w, height - top - 9, "#a9665b" if i == 1 else "#be9a87")
-            for col in range(3):
-                for yy in range(top + 7, 74, 14):
-                    page.rect(base + 4 + col * (w - 5) / 3, y + yy, 4, 6, "#f4e4d8")
-        page.line([(x + 10, y + 79), (x + 148, y + 79)], RED)
-        page.text(x + 159, y + 12, "2 KILLED", "condensed", 23, RED)
-        page.text(x + 159, y + 43, "40+ INJURED", "condensed", 23, RED)
-    elif kind == "oil":
-        page.rect(x, y, width, height, "#e9e3d2")
-        page.line([(x + 20, y + 58), (x + 108, y + 58), (x + 136, y + 34)], OCHRE, 2)
-        page.disk(x + 20, y + 58, 4.5, OCHRE)
-        page.disk(x + 136, y + 34, 4.5, OCHRE)
-        page.text(x + 13, y + 16, "FEDERAL ORDER", "mono", 10, OCHRE)
-        page.text(x + 14, y + 68, "BAGHDAD", "mono", 10, OCHRE)
-        for center in (x + width - 75, x + width - 38):
-            page.line([(center - 13, y + 66), (center, y + 21), (center + 13, y + 66)], OCHRE, 2)
-            page.line([(center - 9, y + 55), (center + 7, y + 43), (center - 7, y + 43), (center + 9, y + 55)], OCHRE)
-            page.line([(center - 15, y + 69), (center + 15, y + 69)], OCHRE, 2)
-        page.text(x + width - 162, y + 73, "KURDISH-HELD OILFIELDS", "mono", 10, OCHRE)
-
-
 def lead_section(page, stories, positions):
+    from illustrations_leads import LEAD_ART
+
     spans = [(24, 342), (380, 303), (697, 303)]
     for (key, (kicker, title, summary, sources, illustration)), (x, width) in zip(LEADS.items(), spans):
         color = ACCENT[stories[key]["category"]]
@@ -186,46 +188,52 @@ def lead_section(page, stories, positions):
             page.line([(x - 7, 197), (x - 7, 450)], RULE)
         badge(page, x, 200, positions[key], color)
         page.text(x + 26, 201, kicker, "mono", 12, color, width=width - 26)
-        lead_illustration(page, x, 218, width, illustration)
+        place_art(page, x, 218, width, 92, LEAD_ART[illustration], (300, 95))
         title_size = 36 if key == 3 else 30
-        n = page.paragraph(x, 313, title, "serif", title_size, width, 2, 32)
-        page.paragraph(x, 320 + 32 * n, summary, "body", 16, width - 5, 3, 17)
+        n = page.paragraph(x, 315, title, "serif", title_size, width, 2, 36 if key == 3 else 32)
+        page.paragraph(x, 322 + 32 * n, summary, "body", 16, width - 5, 3, 17)
         page.text(x, 438, sources, "mono", 11, color, width=width)
 
 
 def newsroom(page, stories, positions):
-    heading(page, 459, "THE NEWS DESK", "EUROPE  /  ASIA  /  AFRICA  /  MIDDLE EAST  /  AMERICAS")
-    column = (RIGHT - LEFT) / 4
-    for index, (key, (loc, title, detail, fact)) in enumerate(DESK.items()):
-        row, col = divmod(index, 4)
-        x, y = LEFT + col * column, 485 + row * 68
+    from illustrations_desk_a import DESK_ART_A
+    from illustrations_desk_b import DESK_ART_B
+
+    artwork = DESK_ART_A | DESK_ART_B
+    if set(artwork) != set(DESK):
+        raise ValueError("Each desk story needs a dedicated illustration.")
+    heading(page, 457, "THE NEWS DESK", "12 ILLUSTRATED REPORTS")
+    column = (RIGHT - LEFT) / 6
+    for index, (key, (loc, title, detail)) in enumerate(DESK.items()):
+        row, col = divmod(index, 6)
+        x, y = LEFT + col * column, 482 + row * 115
         color = ACCENT[stories[key]["category"]]
         if row:
-            page.line([(x, y - 3), (x + column - 11, y - 3)], SOFT_RULE)
+            page.line([(x, y - 2), (x + column - 10, y - 2)], RULE)
         if col:
-            page.line([(x - 5, y + 1), (x - 5, y + 60)], SOFT_RULE)
-        badge(page, x, y + 2, positions[key], color)
-        page.text(x + 26, y + 4, loc, "mono", 10.5, color, width=column - 65)
-        page.text(x + column - 13, y + 3, fact, "condensed", 17, color, anchor="rt")
-        page.fit(x, y + 22, title, "semibold", 20, column - 12, 17)
-        page.text(x, y + 47, detail, "body", 14, MUTED, width=column - 12)
+            page.line([(x - 5, y), (x - 5, y + 107)], RULE)
+        place_art(page, x, y, column - 10, 46, artwork[key], (150, 50))
+        badge(page, x, y + 49, positions[key], color)
+        page.fit(x + 24, y + 52, loc, "mono", 10.5, column - 34, 9, color)
+        page.paragraph(x, y + 67, title, "semibold", 17, column - 10, 2, 16)
+        page.fit(x, y + 99, detail, "body", 13, column - 10, 12, MUTED)
 
 
 def timeline(page, stories, positions):
-    page.line([(LEFT, 693), (RIGHT, 693)], INK, 1.2)
-    page.rect(LEFT, 697, 79, 47, INK)
-    page.text(LEFT + 9, 702, "THE DAY", "condensed", 18, PAPER)
-    page.text(LEFT + 9, 722, "IN UTC", "condensed", 16, PAPER)
+    page.line([(LEFT, 712), (RIGHT, 712)], INK, 1.2)
+    page.rect(LEFT, 716, 79, 44, INK)
+    page.text(LEFT + 9, 721, "THE DAY", "condensed", 17, PAPER)
+    page.text(LEFT + 9, 740, "IN UTC", "condensed", 15, PAPER)
     step = (RIGHT - LEFT - 79) / len(WIRE)
     for index, (key, (time, place, title, detail)) in enumerate(WIRE.items()):
         x = LEFT + 86 + index * step
         color = ACCENT[stories[key]["category"]]
         if index:
-            page.line([(x - 5, 701), (x - 5, 743)], SOFT_RULE)
-        page.text(x, 701, f"{time}  /  {place}", "mono", 10.5, color, width=step - 26)
-        page.text(x + step - 13, 702, f"{positions[key]:02}", "mono", 10, color, anchor="rt")
-        page.fit(x, 715, title, "semibold", 17, step - 10, 15)
-        page.text(x, 734, detail, "body", 12.5, MUTED, width=step - 11)
+            page.line([(x - 5, 719), (x - 5, 759)], SOFT_RULE)
+        page.text(x, 719, f"{time}  /  {place}", "mono", 10.5, color, width=step - 26)
+        page.text(x + step - 13, 719, f"{positions[key]:02}", "mono", 10, color, anchor="rt")
+        page.fit(x, 732, title, "semibold", 16, step - 10, 15)
+        page.text(x, 751, detail, "body", 12.5, MUTED, width=step - 11)
 
 
 def positions_for_map(page, stories, positions, area):
@@ -242,9 +250,13 @@ def positions_for_map(page, stories, positions, area):
         if geometry["type"] == "Polygon":
             polygons = [polygons]
         for polygon in polygons:
+            if max(lat for _, lat in polygon[0]) < south:
+                continue
             for i, ring in enumerate(polygon):
                 coords = [slide(lon, min(north, max(south, lat))) for lon, lat in ring]
-                page.polygon(coords, "#dcd4c6" if i == 0 else "#efe9df")
+                page.polygon(coords, "#b1b8a1" if i == 0 else "#f1e5d2")
+                if i == 0:
+                    page.line(coords, "#7f876f", .75)
 
     located = []
     for key in (*LEADS, *DESK):
@@ -259,7 +271,7 @@ def positions_for_map(page, stories, positions, area):
             mx, my = x + dx, y + dy
             if not (left + 7 <= mx <= left + width - 7 and top + 7 <= my <= top + height - 7):
                 continue
-            if any(math.hypot(mx - ax, my - ay) < 15 for _, _, _, ax, ay in located):
+            if any(math.hypot(mx - ax, my - ay) < 16 for _, _, _, ax, ay in located):
                 continue
             located.append((key, x, y, mx, my))
             break
@@ -272,26 +284,26 @@ def positions_for_map(page, stories, positions, area):
             page.disk(x, y, 1.5, "#625847")
     for key, _, _, mx, my in located:
         color = ACCENT[stories[key]["category"]]
-        page.disk(mx, my, 7.1, color, PAPER)
-        page.text(mx, my, f"{positions[key]:02}", "mono", 8, PAPER, anchor="mm")
+        page.disk(mx, my, 7.3, color, PAPER)
+        page.text(mx, my, f"{positions[key]:02}", "mono", 8.7, PAPER, anchor="mm")
 
 
 def index_and_briefs(page, stories, positions):
-    heading(page, 753, "AROUND THE WORLD", "15 BRIEFS  /  BY REGION")
-    page.text(LEFT, 780, "WHERE IT HAPPENED", "mono", 11.5, TEAL)
-    page.text(LEFT + 226, 782, "01–15", "mono", 10.5, MUTED, anchor="rt")
-    page.rect(LEFT, 798, 227, 128, "#efe9df")
-    positions_for_map(page, stories, positions, (LEFT + 2, 800, 223, 123))
-    page.paragraph(LEFT, 931, "Pins 01–15 match the lead and news desk headlines.",
-                   "body", 12.5, 225, 2, 13, MUTED)
+    heading(page, 768, "AROUND THE WORLD", "15 BRIEFS  /  BY REGION")
+    page.text(LEFT, 793, "WHERE IT HAPPENED", "mono", 11.5, TEAL)
+    page.text(LEFT + 251, 794, "01–15", "mono", 11, MUTED, anchor="rt")
+    page.rect(LEFT, 810, 254, 114, "#f1e5d2")
+    positions_for_map(page, stories, positions, (LEFT + 2, 818, 250, 96))
+    page.paragraph(LEFT, 932, "Numbers 01–15 match the illustrated headlines.",
+                   "body", 12.5, 249, 2, 13, MUTED)
     names = ("AMERICAS / EUROPE", "AFRICA / MIDDLE EAST", "ASIA / PACIFIC")
-    width = (RIGHT - 264) / len(BRIEFS)
+    width = (RIGHT - 291) / len(BRIEFS)
     for col, (name, briefs) in enumerate(zip(names, BRIEFS)):
-        x = 264 + col * width
-        page.line([(x - 6, 781), (x - 6, 953)], RULE)
-        page.text(x, 780, name, "mono", 11.5, TEAL)
+        x = 291 + col * width
+        page.line([(x - 6, 793), (x - 6, 951)], RULE)
+        page.text(x, 793, name, "mono", 11.5, TEAL)
         for row, (key, place, title) in enumerate(briefs):
-            y = 799 + row * 31
+            y = 811 + row * 28
             if row:
                 page.line([(x, y - 3), (x + width - 7, y - 3)], SOFT_RULE, .75)
             color = ACCENT[stories[key]["category"]]

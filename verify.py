@@ -13,6 +13,9 @@ from urllib.parse import urlparse
 from PIL import Image
 
 from edition import BRIEFS, DESK, LEADS, ORDER, WIRE
+from illustrations_desk_a import DESK_ART_A
+from illustrations_desk_b import DESK_ART_B
+from illustrations_leads import LEAD_ART
 from render import ACCENT, REGIONS
 
 
@@ -43,6 +46,9 @@ def check_stories():
            "The headline, desk, brief, and timeline sections have changed in size.")
     demand(sorted(ORDER) == list(range(1, len(stories) + 1)),
            "Some stories are missing or repeated in the print order.")
+    demand(set(LEAD_ART) == {values[-1] for values in LEADS.values()}, "Lead illustration assignment is incomplete.")
+    demand(not (set(DESK_ART_A) & set(DESK_ART_B)), "A desk illustration assignment is duplicated.")
+    demand(set(DESK_ART_A | DESK_ART_B) == set(DESK), "Desk illustration assignment is incomplete.")
     demand(set(s["region"] for s in stories) == set(REGIONS), "Region coverage differs from the plate.")
     demand(set(s["category"] for s in stories) == set(ACCENT), "A topic color has no stories.")
     titles = set()
@@ -70,6 +76,7 @@ def check_stories():
     print(f"Stories: {len(stories)} across {len(REGIONS)} regions")
     print("Statuses:", dict(Counter(s["verification"] for s in stories)))
     print("Source records:", sum(len(s["sources"]) for s in stories))
+    print(f"Original illustrations: {len(LEAD_ART) + len(DESK_ART_A) + len(DESK_ART_B)}")
 
 
 def check_png(file):

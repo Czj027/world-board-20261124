@@ -34,18 +34,18 @@ FIGURES = [
 
 # Each feature represents a single independently numbered news story.
 DESK = {
-    21: ("SAUDI ARABIA", "11 hurt as Riyadh tower hit", "Saudi officials blame Houthis.", "11"),
-    22: ("CHINA", "China probes Shanghai chief", "Chen Jining is a Politburo member.", "CC"),
-    1: ("TAIWAN / SOUTH KOREA", "Asian chip shares rebound", "TAIEX +8.99% and Kospi +6.32%.", "+"),
-    10: ("FRANCE / UNITED STATES", "Sanofi agrees $41B takeover", "The bid offers $175 per Insmed share.", "$"),
-    27: ("MALAYSIA", "Malaysia to send 6,803 back", "Myanmar nationals due back in Dec.", "6.8K"),
-    19: ("STRAIT OF HORMUZ", "Iran says tankers hit mines", "Mine claim remains unverified.", "?"),
-    14: ("SENEGAL", "Senegal regains Africa Cup title", "Sports court restores win vs Morocco.", "1–0"),
-    11: ("ENGLAND", "Heat deaths hit record estimate", "Health agency estimates 5,258 deaths.", "°"),
-    24: ("SOUTH KOREA", "Seoul protests Russian air entry", "Moscow’s military attaché summoned.", "RU"),
-    23: ("CHINA / PAKISTAN", "China names Shenzhou-24 crew", "Pakistani astronaut to fly to Tiangong.", "24"),
-    31: ("FRENCH GUIANA", "Ariane 6 launches 36 satellites", "Amazon Leo payload reaches orbit.", "36"),
-    32: ("INDONESIA", "Factory fire toll rises to 26", "New toll from Nov. 21 candy plant fire.", "26"),
+    21: ("SAUDI ARABIA", "11 hurt as Riyadh tower hit", "Officials blame Houthis."),
+    22: ("CHINA", "Shanghai party chief probed", "Chen sits on the Politburo."),
+    1: ("TAIWAN / S. KOREA", "Asian chip shares rebound", "Taipei and Seoul led gains."),
+    10: ("FRANCE / U.S.", "Sanofi agrees $41B takeover", "$175 per Insmed share."),
+    27: ("MALAYSIA", "Malaysia to send 6,803 back", "Myanmar nationals due back."),
+    19: ("STRAIT OF HORMUZ", "Iran says tankers hit mines", "Mine claim is unverified."),
+    14: ("SENEGAL", "Senegal regains Africa Cup title", "1–0 over Morocco restored."),
+    11: ("ENGLAND", "Heat deaths hit record estimate", "5,258 linked to summer heat."),
+    24: ("SOUTH KOREA", "Seoul protests Russian air entry", "Russian attaché summoned."),
+    23: ("CHINA / PAKISTAN", "China names Shenzhou-24 crew", "First Pakistani crew member."),
+    31: ("FRENCH GUIANA", "Ariane 6 launches 36 satellites", "Amazon Leo reaches orbit."),
+    32: ("INDONESIA", "Factory fire toll rises to 26", "Candy plant burned Nov. 21."),
 }
 
 WIRE = {
@@ -87,5 +87,5 @@ DATE_NOTE = (
 )
 SOURCE_NOTE = (
     "SOURCE NOTES",
-    "Headlines credit original reporting and public records. Mine strikes are an attributed claim. Full source and time notes are in the public edition.",
+    "Lead sources are printed above. Mine strikes are an attributed claim. Full citations and UTC notes accompany the edition.",
 )
