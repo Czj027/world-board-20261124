@@ -12,6 +12,7 @@ from urllib.parse import urlparse
 
 from PIL import Image
 
+from edition import BRIEFS, DESK, LEADS, ORDER, WIRE
 from render import ACCENT, REGIONS
 
 
@@ -37,7 +38,11 @@ def check_clock(value):
 
 def check_stories():
     stories = json.loads((ROOT / "stories.json").read_text(encoding="utf-8"))
-    demand(len(stories) == 30, "Issue should contain 30 stories.")
+    demand(len(stories) == 34, "Issue should contain 34 stories.")
+    demand((len(LEADS), len(DESK), sum(map(len, BRIEFS)), len(WIRE)) == (3, 12, 15, 4),
+           "The headline, desk, brief, and timeline sections have changed in size.")
+    demand(sorted(ORDER) == list(range(1, len(stories) + 1)),
+           "Some stories are missing or repeated in the print order.")
     demand(set(s["region"] for s in stories) == set(REGIONS), "Region coverage differs from the plate.")
     demand(set(s["category"] for s in stories) == set(ACCENT), "A topic color has no stories.")
     titles = set()
